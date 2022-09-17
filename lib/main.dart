@@ -55,8 +55,11 @@ class _basepageState extends State<basepage> {
       myWidgets.setUpAnArea(thisConnection),
     ];
     String? ip = "";
-    ip = prefs.getString("IP");
-    if (ip != null && ip != "") iptextcontroller.text = ip;
+    ip = prefs.getString("IP").toString().trim();
+    if (ip != null && ip != "") {
+      iptextcontroller.text = ip;
+      globalData.targetIp = ip;
+    }
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -75,7 +78,9 @@ class _basepageState extends State<basepage> {
                       setState(() {
                         presentedIcon = Icon(Icons.hourglass_top_rounded);
                       });
-                      await prefs.setString("IP", iptextcontroller.text);
+                      await prefs.setString(
+                          "IP", iptextcontroller.text.toString());
+                      globalData.targetIp = iptextcontroller.text.trim();
                       String res = await NetworkScanner().ScanNetworkForLeds();
                       if (res != "")
                         setState(() {
@@ -83,7 +88,7 @@ class _basepageState extends State<basepage> {
                           iptextcontroller.text = res;
                         });
                       if (res != "") {
-                        await prefs.setString(res);
+                        await prefs.setString("IP",res);
                       }
                       setState(() {
                         presentedIcon = Icon(Icons.search);
