@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'msgmenus.dart';
 import 'connection.dart';
 import 'global_Data.dart' as globalData;
 import 'network_scan.dart';
 
-void main() {
+var prefs = null;
+void main() async {
+  await WidgetsFlutterBinding.ensureInitialized();
+
   globalData.targetIp = "192.168.18.233"; //initialize global variables
   globalData.targetPort = "80"; //initialize global variables
+  prefs = await SharedPreferences.getInstance();
   runApp(const MaterialApp(home: basepage()));
 }
 
@@ -49,6 +54,9 @@ class _basepageState extends State<basepage> {
       myWidgets.setPatternSpeed(thisConnection),
       myWidgets.setUpAnArea(thisConnection),
     ];
+    String? ip = "";
+    ip = prefs.getString("IP");
+    if (ip != null && ip != "") iptextcontroller.text = ip;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -67,12 +75,16 @@ class _basepageState extends State<basepage> {
                       setState(() {
                         presentedIcon = Icon(Icons.hourglass_top_rounded);
                       });
+                      await prefs.setString("IP", iptextcontroller.text);
                       String res = await NetworkScanner().ScanNetworkForLeds();
                       if (res != "")
                         setState(() {
                           globalData.targetIp = res.trim();
                           iptextcontroller.text = res;
                         });
+                      if (res != "") {
+                        await prefs.setString(res);
+                      }
                       setState(() {
                         presentedIcon = Icon(Icons.search);
                       });
